@@ -19,15 +19,12 @@ parseMessage log = case words log of
 parse :: String -> [LogMessage]
 parse logFile = [parseMessage(logLine) | logLine <- lines(logFile)]
 
--- QUESTION: I wrote out (LogMessage messageType timestamp string) when I needed
--- to use one of its components, which required me to rewrite it all again. Is
--- there a better way to do this?
 insert :: LogMessage -> MessageTree -> MessageTree
 insert (Unknown _) tree = tree
 insert logMessage Leaf = Node Leaf logMessage Leaf
-insert (LogMessage mType ts str) (Node leftTree (LogMessage nMType nTS nStr) rightTree)
-  | ts < nTS = Node (insert (LogMessage mType ts str) leftTree) (LogMessage nMType nTS nStr) rightTree
-  | otherwise = Node leftTree (LogMessage nMType nTS nStr) (insert (LogMessage mType ts str) rightTree)
+insert logMessage@(LogMessage _ ts _) (Node leftTree nodeMessage@(LogMessage _ nodeTS _) rightTree)
+  | ts < nodeTS = Node (insert logMessage leftTree) nodeMessage rightTree
+  | otherwise = Node leftTree nodeMessage (insert logMessage rightTree)
 insert _ tree = tree
 
 build :: [LogMessage] -> MessageTree
