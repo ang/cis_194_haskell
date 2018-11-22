@@ -3,14 +3,6 @@ module LogAnalysis where
 
 import Log
 
--- parseMessage "E 2 562 help help"
--- == LogMessage (Error 2) 562 "help help"
--- cis 194: homework 2 3
--- parseMessage "I 29 la la la"
--- == LogMessage Info 29 "la la la"
--- parseMessage "This is not in the right format"
--- == Unknown "This is not in the right format"
-
 -- "words" function will parse a string into a list of words, separated by
 -- whitespace
 -- "read" function casts a string into another type
@@ -47,20 +39,15 @@ inOrder Leaf = []
 inOrder (Node leftTree logMessage rightTree) = inOrder(leftTree) ++ [logMessage] ++ inOrder(rightTree)
 
 whatWentWrong :: [LogMessage] -> [String]
-whatWentWrong messages = stringsFromLogs (inOrder (build [message | message <- messages, parseErrorsAbove message 50]))
+whatWentWrong messages = stringsFromLogs (inOrder (build [message | message <- messages, filterErrorsAboveSeverity message 50]))
 
 -- Returns errors above a certain serverity level
-parseErrorsAbove :: LogMessage -> Int -> Bool
-parseErrorsAbove (LogMessage (Error serverity) _ts _str) threshold = serverity >= threshold
-parseErrorsAbove _ _ = False
+filterErrorsAboveSeverity :: LogMessage -> Int -> Bool
+filterErrorsAboveSeverity (LogMessage (Error serverity) _ts _str) threshold = serverity >= threshold
+filterErrorsAboveSeverity _ _ = False
 
 stringsFromLogs :: [LogMessage] -> [String]
 stringsFromLogs strings = [str | (LogMessage _ _ str) <- strings]
-
--- 1. Filter to only have errors greater than 50
--- 2. Put it into tree
--- 3. Return sorted list
--- 4. Get only messages from sorted list
 
 -- Test data
 -- logs = ["I 2 blah",
